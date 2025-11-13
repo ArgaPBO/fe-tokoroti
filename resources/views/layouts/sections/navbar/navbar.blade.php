@@ -3,6 +3,42 @@
   use Illuminate\Support\Facades\Route;
   $containerNav = ($configData['contentLayout'] === 'compact') ? 'container-xxl' : 'container-fluid';
   $navbarDetached = ($navbarDetached ?? '');
+
+  // --- Bagian Baru: Ambil Nama Halaman dari JSON ---
+  $currentPath = trim(request()->path(), '/'); // Ambil path dan hapus slash di awal/akhir
+  $pageTitle = 'Dashboard'; // Default
+
+  $menuJsonPath = resource_path('menu/verticalMenu.json'); // <- Ganti path disini
+  if (file_exists($menuJsonPath)) {
+    $menuData = json_decode(file_get_contents($menuJsonPath), true);
+
+    if ($menuData && isset($menuData['menu'])) {
+      foreach ($menuData['menu'] as $item) {
+        // Cek item utama
+        if (isset($item['url'])) {
+          $itemUrl = trim($item['url'], '/'); // Hapus slash di awal/akhir
+          if ($currentPath === $itemUrl) {
+            $pageTitle = $item['name'] ?? 'Unknown Page';
+            break;
+          }
+        }
+
+        // Cek submenu
+        if (isset($item['submenu']) && is_array($item['submenu'])) {
+          foreach ($item['submenu'] as $subItem) {
+            if (isset($subItem['url'])) {
+              $subUrl = trim($subItem['url'], '/');
+              if ($currentPath === $subUrl) {
+                $pageTitle = $subItem['name'] ?? 'Unknown Subpage';
+                break 2; // Keluar dari dua loop
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // --- Akhir Bagian Baru ---
 @endphp
 
 <!-- Navbar -->
@@ -16,22 +52,6 @@
       <div class="{{$containerNav}}">
   @endif
 
-      <!--  Brand demo (display only for navbar-full and hide on below xl) -->
-      @if(isset($navbarFull))
-        <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-6">
-          <a href="{{url('/')}}" class="app-brand-link gap-2">
-            <span
-              class="app-brand-logo demo">@include('_partials.macros', ["width" => 25, "withbg" => 'var(--bs-primary)'])</span>
-            <span class="app-brand-text demo menu-text fw-semibold">{{config('variables.templateName')}}</span>
-          </a>
-          @if(isset($menuHorizontal))
-            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-xl-none">
-              <i class="ri-close-fill align-middle"></i>
-            </a>
-          @endif
-        </div>
-      @endif
-
       <!-- ! Not required for layout-without-menu -->
       @if(!isset($navbarHideToggle))
         <div
@@ -44,44 +64,85 @@
 
       <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
 
-        @if($configData['hasCustomizer'] == true)
-          <!-- Style Switcher -->
-          <div class="navbar-nav align-items-center">
-            <div class="nav-item dropdown-style-switcher dropdown me-1 me-xl-0">
-              <a class="nav-link btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
-                href="javascript:void(0);" data-bs-toggle="dropdown">
-                <i class='ri-22px'></i>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
-                <li>
-                  <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
-                    <span class="align-middle"><i class='ri-sun-line ri-22px me-3'></i>Light</span>
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
-                    <span class="align-middle"><i class="ri-moon-clear-line ri-22px me-3"></i>Dark</span>
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="javascript:void(0);" data-theme="system">
-                    <span class="align-middle"><i class="ri-computer-line ri-22px me-3"></i>System</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <!--/ Style Switcher -->
-        @endif
+        <!-- JUDUL HALAMAN DINAMIS BERDASARKAN JSON -->
+        <h1 class="nav-item nav-link mb-0 me-3 p-0">{{ $pageTitle }}</h1>
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
 
-          <!-- User -->
+
+          <!--/ Search -->
+
+          <!-- TOMBOL NOTIFIKASI -->
+          <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-2 me-xl-1">
+            <a class="nav-link btn btn-text-secondary rounded-pill btn-icon dropdown-toggle hide-arrow"
+              href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+              <i class="ri-notification-3-line ri-22px"></i>
+              <span class="badge bg-danger rounded-pill badge-notifications">5</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end py-0">
+              <li class="dropdown-menu-header border-bottom">
+                <div class="dropdown-header d-flex align-items-center py-3">
+                  <h6 class="mb-0 me-auto">Notifications</h6>
+                  <span class="badge rounded-pill bg-label-primary">5 New</span>
+                </div>
+              </li>
+              <li class="dropdown-notifications-list scrollable-container">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                    <div class="d-flex">
+                      <div class="flex-shrink-0 me-3">
+                        <div class="avatar">
+                          <img src="{{ asset('assets/img/avatars/1.png') }}" alt class="rounded-circle"
+                            onerror="this.src='https://placehold.co/40x40/666666/FFFFFF?text=A'">
+                        </div>
+                      </div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1">Congratulation Sam! 🥳</h6>
+                        <p class="mb-0">Won the monthly best seller badge</p>
+                        <small class="text-muted">1h ago</small>
+                      </div>
+                      <div class="flex-shrink-0 dropdown-notifications-actions">
+                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><i
+                            class="ri-close-line ri-20px"></i></a>
+                      </div>
+                    </div>
+                  </li>
+                  <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                    <div class="d-flex">
+                      <div class="flex-shrink-0 me-3">
+                        <div class="avatar">
+                          <span class="avatar-initial rounded-circle bg-label-danger">CF</span>
+                        </div>
+                      </div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1">Charles Franklin</h6>
+                        <p class="mb-0">Accepted your connection</p>
+                        <small class="text-muted">12hr ago</small>
+                      </div>
+                      <div class="flex-shrink-0 dropdown-notifications-actions">
+                        <a href="javascript:void(0)" class="dropdown-notifications-archive"><i
+                            class="ri-close-line ri-20px"></i></a>
+                      </div>
+                    </div>
+                  </li>
+                  {{-- Anda bisa tambahkan item notifikasi lain di sini --}}
+                </ul>
+              </li>
+              <li class="dropdown-menu-footer border-top">
+                <a href="javascript:void(0);" class="dropdown-item d-flex justify-content-center p-3">
+                  View all notifications
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!--/ Notification -->
+
+          <!-- LOGO PENGGUNA (KODE ASLI ANDA) -->
           <li class="nav-item navbar-dropdown dropdown-user dropdown">
             <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
               <div class="avatar avatar-online">
                 <img src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}" alt
-                  class="rounded-circle">
+                  class="rounded-circle" onerror="this.src='https://placehold.co/40x40/666666/FFFFFF?text=U'">
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
@@ -93,7 +154,8 @@
                       <div class="avatar avatar-online">
                         <img
                           src="{{ Auth::user() ? Auth::user()->profile_photo_url : asset('assets/img/avatars/1.png') }}"
-                          alt class="rounded-circle">
+                          alt class="rounded-circle"
+                          onerror="this.src='https://placehold.co/40x40/666666/FFFFFF?text=U'">
                       </div>
                     </div>
                     <div class="flex-grow-1">
@@ -104,7 +166,7 @@
                           John Doe
                         @endif
                       </span>
-                      <small class="text-muted">Admin</small>
+                      <small class="text-muted">Administrator</small>
                     </div>
                   </div>
                 </a>

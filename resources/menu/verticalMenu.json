@@ -2,7 +2,7 @@
   "menu": [
     {
       "url": "/",
-      "name": "Home",
+      "name": "Beranda",
       "icon": "menu-icon tf-icons ri-home-smile-line",
       "slug": "pages-home"
     },
@@ -11,6 +11,83 @@
       "icon": "menu-icon tf-icons ri-file-3-line",
       "name": "Page 2",
       "slug": "pages-page-2"
+    },
+    {
+      "menuHeader": "Admin Panel"
+    },
+    {
+      "url": "/admin",
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "slug": "admin.dashboard"
+    },
+    {
+      "name": "Manajement",
+      "icon": "menu-icon tf-icons ri-settings-3-line",
+      "slug": "admin.manajement",
+      "submenu": [
+        {
+          "url": "/admin/products",
+          "name": "Product",
+          "icon": "menu-icon tf-icons ri-shopping-bag-3-line",
+          "slug": "admin.product"
+        },
+        {
+          "url": "/admin/branchs",
+          "name": "Branch",
+          "icon": "menu-icon tf-icons ri-store-2-line",
+          "slug": "admin.branch"
+        }
+      ]
+    },
+    {
+      "url": "/admin/financial",
+      "name": "Financial Report",
+      "icon": "menu-icon tf-icons ri-file-text-line",
+      "slug": "admin.financial"
+    },
+    {
+      "url": "/admin/performance",
+      "name": "Analysis Performa",
+      "icon": "menu-icon tf-icons ri-line-chart-line",
+      "slug": "admin.perform"
+    },
+    {
+      "menuHeader": "Cabang Panel"
+    },
+    {
+      "url": "/branch",
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "slug": "branch.dashboard"
+    },
+    {
+      "name": "Branch Features",
+      "icon": "menu-icon tf-icons ri-store-2-line",
+      "slug": "branch.features",
+      "submenu": [
+        {
+          "url": "/branch/transactions",
+          "name": "New Transactions",
+          "icon": "menu-icon tf-icons ri-exchange-dollar-line",
+          "slug": "branch.transactions"
+        },
+        {
+          "url": "/branch/export",
+          "name": "Export Report",
+          "icon": "menu-icon tf-icons ri-file-export-line",
+          "slug": "branch.export"
+        },
+        {
+          "url": "/branch/graphics",
+          "name": "Show Graphics",
+          "icon": "menu-icon tf-icons ri-bar-chart-2-line",
+          "slug": "branch.graphics"
+        }
+      ]
+    },
+    {
+      "menuHeader": "Halaman Lain"
     },
     {
       "url": "/pages/misc-error",
