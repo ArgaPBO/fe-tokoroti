@@ -2,11 +2,11 @@
   $configData = Helper::appClasses();
 @endphp
 
-@extends('layouts/layoutMaster')
+{{-- @extends('layouts/layoutMaster') --}}
 
-@section('title', 'Login - Toko Kue PAD')
+{{-- @section('title', 'Login - Toko Kue PAD') --}}
 
-@section('page-style')
+{{-- @section('page-style') --}}
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
@@ -131,9 +131,9 @@
       opacity: 0.9;
     }
   </style>
-@endsection
+{{-- @endsection --}}
 
-@section('content')
+{{-- @section('content') --}}
   <div class="login-container">
     <div class="login-form">
       <h2>Halaman Login</h2>
@@ -169,4 +169,58 @@
     <h1>Hello, Welcome!</h1>
     <p>Silakan masuk untuk melanjutkan.</p>
   </div>
-@endsection
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.querySelector('#username').value;
+      const password = document.querySelector('#password').value;
+
+      try {
+        // your API endpoint from .env (example: https://api.example.com)
+        const apiUrl = "{{ env('API_URL') }}/login";
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert('Invalid credentials.');
+          } else {
+            alert('Server error: ' + response.status);
+          }
+          return;
+        }
+
+        const data = await response.json();
+
+        // Save the token to the session
+        sessionStorage.setItem('token', data.token);
+
+        // Redirect based on role
+        if (data.admin) {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/branch';
+        }
+
+      } catch (error) {
+        console.error('Login failed:', error);
+        alert('Could not connect to server.');
+      }
+    });
+  });
+</script>
+
+
+{{-- @endsection --}}
