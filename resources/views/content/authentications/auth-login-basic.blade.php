@@ -171,7 +171,35 @@
   </div>
 
 <script>
+  // Helper: set a cookie with optional days to expire
+  function setCookie(name, value, days) {
+    let expires = '';
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = '; expires=' + date.toUTCString();
+    }
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    // Use SameSite=Lax to allow simple cross-site navigation while being reasonably safe
+    document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/; SameSite=Lax${secure}`;
+  }
+
+  // Helper: read a cookie by name
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    // If a token cookie already exists, redirect according to stored role so user doesn't have to login again
+    const existingToken = getCookie('token');
+    if (existingToken) {
+      const isAdmin = getCookie('is_admin') === '1';
+      if (isAdmin) window.location.href = '/admin';
+      else window.location.href = '/branch';
+      return; // stop further execution on login page
+    }
+
     const form = document.querySelector('form');
 
     form.addEventListener('submit', async (e) => {
@@ -204,8 +232,10 @@
 
         const data = await response.json();
 
-        // Save the token to the session
-        sessionStorage.setItem('token', data.token);
+        // Persist token & role in cookies so user stays logged in across browser sessions
+        // NOTE: This is not HttpOnly (can't be set from JS). For higher security store token in HttpOnly cookie from server.
+        setCookie('token', data.token, 30); // 30 days
+        setCookie('is_admin', data.admin ? '1' : '0', 30);
 
         // Redirect based on role
         if (data.admin) {

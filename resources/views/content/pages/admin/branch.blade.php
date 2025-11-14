@@ -29,90 +29,11 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th>Locations</th>
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody class="table-border-bottom-0">
-          {{-- Contoh Data Baris 1 --}}
-          <tr>
-            <td><strong>Branch A</strong></td>
-            <td>Yogyakarta City</td>
-            <td>
-              <div class="d-flex">
-                {{-- Tombol Pemicu Modal "Edit" --}}
-                <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#editBranchModal">
-                  <i class="ri-pencil-line"></i>
-                </a>
-                {{-- Tombol Pemicu Modal "Delete" --}}
-                <a class="btn btn-sm btn-icon btn-outline-danger" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#deleteBranchModal">
-                  <i class="ri-delete-bin-line"></i>
-                </a>
-              </div>
-            </td>
-          </tr>
-          {{-- Contoh Data Baris 2 --}}
-          <tr>
-            <td><strong>Branch B</strong></td>
-            <td>Gunung Kidul</td>
-
-            <td>
-              <div class="d-flex">
-                {{-- Tombol Pemicu Modal "Edit" --}}
-                <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#editBranchModal">
-                  <i class="ri-pencil-line"></i>
-                </a>
-                {{-- Tombol Pemicu Modal "Delete" --}}
-                <a class="btn btn-sm btn-icon btn-outline-danger" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#deleteBranchModal">
-                  <i class="ri-delete-bin-line"></i>
-                </a>
-              </div>
-            </td>
-          </tr>
-          {{-- Contoh Data Baris 3 --}}
-          <tr>
-            <td><strong>Branch C</strong></td>
-            <td>Sleman</td>
-
-            <td>
-              <div class="d-flex">
-                {{-- Tombol Pemicu Modal "Edit" --}}
-                <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#editBranchModal">
-                  <i class="ri-pencil-line"></i>
-                </a>
-                {{-- Tombol Pemicu Modal "Delete" --}}
-                <a class="btn btn-sm btn-icon btn-outline-danger" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#deleteBranchModal">
-                  <i class="ri-delete-bin-line"></i>
-                </a>
-              </div>
-            </td>
-          </tr>
-          {{-- Contoh Data Baris 4 --}}
-          <tr>
-            <td><strong>Branch D</strong></td>
-            <td>Bantul</td>
-
-            <td>
-              <div class="d-flex">
-                {{-- Tombol Pemicu Modal "Edit" --}}
-                <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#editBranchModal">
-                  <i class="ri-pencil-line"></i>
-                </a>
-                {{-- Tombol Pemicu Modal "Delete" --}}
-                <a class="btn btn-sm btn-icon btn-outline-danger" href="javascript:void(0);" data-bs-toggle="modal"
-                  data-bs-target="#deleteBranchModal">
-                  <i class="ri-delete-bin-line"></i>
-                </a>
-              </div>
-            </td>
-          </tr>
+        <tbody class="table-border-bottom-0" id="branchTableBody">
+          {{-- Data akan diisi oleh JavaScript --}}
         </tbody>
       </table>
     </div>
@@ -120,28 +41,8 @@
     <!-- ===== Paginasi ===== -->
     <div class="card-footer d-flex justify-content-center">
       <nav aria-label="Page navigation">
-        <ul class="pagination mb-0">
-          <li class="page-item prev">
-            <a class="page-link" href="javascript:void(0);"><i class="ri-arrow-left-s-line"></i></a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="javascript:void(0);">1</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="javascript:void(0);">2</a>
-          </li>
-          <li class="page-item active">
-            <a class="page-link" href="javascript:void(0);">3</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="javascript:void(0);">4</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="javascript:void(0);">5</a>
-          </li>
-          <li class="page-item next">
-            <a class="page-link" href="javascript:void(0);"><i class="ri-arrow-right-s-line"></i></a>
-          </li>
+        <ul class="pagination mb-0" id="paginationList">
+          {{-- Pagination akan diisi oleh JavaScript --}}
         </ul>
       </nav>
     </div>
@@ -160,25 +61,16 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form>
+          <form id="addBranchForm">
             <div class="mb-3">
               <label for="addBranchName" class="form-label">Branch Name</label>
-              <input type="text" class="form-control" id="addBranchName" placeholder="e.g., Branch Wonosari">
-            </div>
-            <div class="mb-3">
-              <label for="addBranchLocations" class="form-label">Location</label>
-              <input type="text" class="form-control" id="addBranchLocations" placeholder="e.g., Jl. Tentara Pelajar">
-            </div>
-            <div class="mb-3">
-              <label for="addBranchDesc" class="form-label">Description (Optional)</label>
-              <textarea class="form-control" id="addBranchDesc" rows="3"
-                placeholder="Notes about this branch..."></textarea>
+              <input type="text" class="form-control" id="addBranchName" placeholder="e.g., Branch Wonosari" required>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save Branch</button>
+          <button type="button" class="btn btn-primary" id="saveBranchBtn">Save Branch</button>
         </div>
       </div>
     </div>
@@ -193,49 +85,184 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form>
-            {{-- Di aplikasi nyata, Anda akan mengisi 'value' ini dengan data dari branch yang diklik --}}
+          <form id="editBranchForm">
             <div class="mb-3">
               <label for="editBranchName" class="form-label">Branch Name</label>
-              <input type="text" class="form-control" id="editBranchName" value="Branch A">
-            </div>
-            <div class="mb-3">
-              <label for="editBranchLocation" class="form-label">Location</label>
-              <input type="text" class="form-control" id="editBranchLocation" value="Yogyakarta City">
-            </div>
-            <div class="mb-3">
-              <label for="editBranchDesc" class="form-label">Description (Optional)</label>
-              <textarea class="form-control" id="editBranchDesc" rows="3"></textarea>
+              <input type="text" class="form-control" id="editBranchName" required>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save Changes</button>
+          <button type="button" class="btn btn-primary" id="saveEditBranchBtn">Save Changes</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 3. Modal Hapus Branch (Delete Branch) -->
-  <div class="modal fade" id="deleteBranchModal" tabindex="-1" aria-labelledby="deleteBranchModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteBranchModalLabel">Delete Branch?</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete this branch?</p>
-          <p>This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-danger">Delete</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <script>
+    const API_URL = '{{ env("API_URL") }}';
+    let currentPage = 1;
+    let currentBranchId = null;
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function authHeaders() {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = getCookie('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      // include CSRF only when blade provides it
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+      if (csrf) headers['X-CSRF-TOKEN'] = csrf;
+      return headers;
+    }
+
+    // Fetch branches from API
+    async function fetchBranches(page = 1) {
+      try {
+        const response = await fetch(`${API_URL}/branches?page=${page}`, {
+          headers: authHeaders()
+        });
+        const data = await response.json();
+        
+        renderBranchTable(data.data);
+        renderPagination(data);
+        currentPage = page;
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+        alert('Failed to load branches');
+      }
+    }
+
+    // Render branch table
+    function renderBranchTable(branches) {
+      const tbody = document.getElementById('branchTableBody');
+      tbody.innerHTML = '';
+
+      if (branches.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="text-center">No branches found</td></tr>';
+        return;
+      }
+
+      branches.forEach(branch => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><strong>${branch.name}</strong></td>
+          <td>
+            <div class="d-flex">
+              <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);" 
+                 data-bs-toggle="modal" data-bs-target="#editBranchModal" onclick="loadEditBranch(${branch.id}, '${branch.name}')">
+                <i class="ri-pencil-line"></i>
+              </a>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Render pagination
+    function renderPagination(data) {
+      const paginationList = document.getElementById('paginationList');
+      paginationList.innerHTML = '';
+
+      // Previous button
+      const prevLi = document.createElement('li');
+      prevLi.className = `page-item ${data.current_page === 1 ? 'disabled' : ''}`;
+      prevLi.innerHTML = `<a class="page-link" href="javascript:void(0);" onclick="fetchBranches(${data.current_page - 1})"><i class="ri-arrow-left-s-line"></i></a>`;
+      paginationList.appendChild(prevLi);
+
+      // Page numbers
+      for (let i = 1; i <= data.last_page; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === data.current_page ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="javascript:void(0);" onclick="fetchBranches(${i})">${i}</a>`;
+        paginationList.appendChild(li);
+      }
+
+      // Next button
+      const nextLi = document.createElement('li');
+      nextLi.className = `page-item ${data.current_page === data.last_page ? 'disabled' : ''}`;
+      nextLi.innerHTML = `<a class="page-link" href="javascript:void(0);" onclick="fetchBranches(${data.current_page + 1})"><i class="ri-arrow-right-s-line"></i></a>`;
+      paginationList.appendChild(nextLi);
+    }
+
+    // Load edit branch data
+    function loadEditBranch(id, name) {
+      currentBranchId = id;
+      document.getElementById('editBranchName').value = name;
+    }
+
+    // Save new branch
+    document.getElementById('saveBranchBtn').addEventListener('click', async function() {
+      const name = document.getElementById('addBranchName').value.trim();
+      
+      if (!name) {
+        alert('Please enter a branch name');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/branches`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ name })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert(data.message || 'Branch created successfully');
+          document.getElementById('addBranchForm').reset();
+          bootstrap.Modal.getInstance(document.getElementById('addBranchModal')).hide();
+          fetchBranches(1);
+        } else {
+          alert(data.message || 'Failed to create branch');
+        }
+      } catch (error) {
+        console.error('Error creating branch:', error);
+        alert('Error creating branch');
+      }
+    });
+
+    // Save edited branch
+    document.getElementById('saveEditBranchBtn').addEventListener('click', async function() {
+      const name = document.getElementById('editBranchName').value.trim();
+      
+      if (!name) {
+        alert('Please enter a branch name');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/branches/${currentBranchId}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify({ name })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert(data.message || 'Branch updated successfully');
+          bootstrap.Modal.getInstance(document.getElementById('editBranchModal')).hide();
+          fetchBranches(currentPage);
+        } else {
+          alert(data.message || 'Failed to update branch');
+        }
+      } catch (error) {
+        console.error('Error updating branch:', error);
+        alert('Error updating branch');
+      }
+    });
+
+    // Load branches on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchBranches(1);
+    });
+  </script>
 
 @endsection
