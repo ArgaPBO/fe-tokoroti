@@ -16,8 +16,9 @@ Route::prefix("admin")
   ->name("admin.")
   ->group(function () {
     Route::view("/", "content.pages.admin.dashboard")->name("dashboard");
-    Route::view("/branches", "content.pages.admin.branch")->name("branches");
-    Route::view("/products", "content.pages.admin.product")->name("products");
+    Route::view("/branches", "content.pages.admin.branches")->name("branches");
+    Route::view("/products", "content.pages.admin.products")->name("products");
+    Route::view("/expenses", "content.pages.admin.expenses")->name("expenses");
   });
 
 // --- BRANCH ROUTES ---

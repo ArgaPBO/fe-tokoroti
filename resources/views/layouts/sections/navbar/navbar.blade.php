@@ -243,30 +243,14 @@
               <li>
                 <div class="dropdown-divider"></div>
               </li>
-              @if (Auth::check())
-                <li>
-                  <div class="d-grid px-4 pt-2 pb-1">
-                    <a class="btn btn-sm btn-danger d-flex" href="{{ route('logout') }}"
-                      onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                      <small class="align-middle">Logout</small>
-                      <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
-                    </a>
-                  </div>
-                </li>
-                <form method="POST" id="logout-form" action="{{ route('logout') }}">
-                  @csrf
-                </form>
-              @else
-                <li>
-                  <div class="d-grid px-4 pt-2 pb-1">
-                    <a class="btn btn-sm btn-danger d-flex"
-                      href="{{ Route::has('login') ? route('login') : url('auth/login-basic') }}">
-                      <small class="align-middle">Login</small>
-                      <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
-                    </a>
-                  </div>
-                </li>
-              @endif
+              <li>
+                <div class="d-grid px-4 pt-2 pb-1">
+                  <button class="btn btn-sm btn-danger d-flex" id="logoutBtn" onclick="handleLogout(event);">
+                    <small class="align-middle">Logout</small>
+                    <i class="ri-logout-box-r-line ms-2 ri-16px"></i>
+                  </button>
+                </div>
+              </li>
             </ul>
           </li>
           <!--/ User -->
@@ -276,4 +260,52 @@
         </div>
       @endif
   </nav>
+
+  <script>
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function deleteCookie(name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
+
+    async function handleLogout(event) {
+      event.preventDefault();
+      const apiUrl = '{{ env("API_URL") }}';
+      const token = getCookie('token');
+      
+      if (!token) {
+        // no token, just redirect to login
+        window.location.href = '/login';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${apiUrl}/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+          }
+        });
+
+        // clear cookies regardless of response
+        deleteCookie('token');
+        deleteCookie('is_admin');
+
+        // redirect to login page
+        window.location.href = '/login';
+
+      } catch (err) {
+        console.error('Logout error:', err);
+        // clear cookies and redirect anyway
+        deleteCookie('token');
+        deleteCookie('is_admin');
+        window.location.href = '/login';
+      }
+    }
+  </script>
   <!-- / Navbar -->
