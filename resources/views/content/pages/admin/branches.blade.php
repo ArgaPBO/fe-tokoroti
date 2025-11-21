@@ -1,5 +1,7 @@
 @extends('layouts.contentNavbarLayout')
 
+{{-- Ahsani --}}
+
 {{-- Judul ini akan muncul di navbar atas Anda --}}
 @section('title', 'Management Branch')
 
@@ -127,7 +129,7 @@
           headers: authHeaders()
         });
         const data = await response.json();
-        
+
         renderBranchTable(data.data);
         renderPagination(data);
         currentPage = page;
@@ -153,7 +155,7 @@
           <td><strong>${branch.name}</strong></td>
           <td>
             <div class="d-flex">
-              <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);" 
+              <a class="btn btn-sm btn-icon btn-outline-primary me-2" href="javascript:void(0);"
                  data-bs-toggle="modal" data-bs-target="#editBranchModal" onclick="loadEditBranch(${branch.id}, '${branch.name}')">
                 <i class="ri-pencil-line"></i>
               </a>
@@ -199,7 +201,7 @@
     // Save new branch
     document.getElementById('saveBranchBtn').addEventListener('click', async function() {
       const name = document.getElementById('addBranchName').value.trim();
-      
+
       if (!name) {
         alert('Please enter a branch name');
         return;
@@ -213,7 +215,7 @@
         });
 
         const data = await response.json();
-        
+
         if (response.ok) {
           alert(data.message || 'Branch created successfully');
           document.getElementById('addBranchForm').reset();
@@ -231,7 +233,7 @@
     // Save edited branch
     document.getElementById('saveEditBranchBtn').addEventListener('click', async function() {
       const name = document.getElementById('editBranchName').value.trim();
-      
+
       if (!name) {
         alert('Please enter a branch name');
         return;
@@ -245,7 +247,7 @@
         });
 
         const data = await response.json();
-        
+
         if (response.ok) {
           alert(data.message || 'Branch updated successfully');
           bootstrap.Modal.getInstance(document.getElementById('editBranchModal')).hide();
