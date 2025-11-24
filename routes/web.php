@@ -26,6 +26,8 @@ Route::prefix("branch")
   ->name("branch.")
   ->group(function () {
     Route::view("/", "content.pages.branch.dashboard")->name("dashboard");
+    Route::view("/products", "content.pages.branch.products")->name("products");
+    Route::view("/history/product", "content.pages.branch.producthistory")->name("producthistory");
   });
 
 Route::view("/login", "content.authentications.auth-login-basic")->name("login");
