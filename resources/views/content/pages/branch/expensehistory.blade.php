@@ -42,6 +42,7 @@
             <th>Tanggal</th>
             <th>Pengeluaran</th>
             <th>Nominal</th>
+            <th>Shift</th>
             <th>Deskripsi</th>
             <th>Aksi</th>
           </tr>
@@ -82,19 +83,19 @@
             <div class="mb-3">
               <label for="singleExpenseSearch" class="form-label">Expense Type <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="singleExpenseSearch" placeholder="Search expenses...">
-            </div>
-            <div class="mb-3">
-              <label for="singleExpenseSelect" class="form-label">Select Expense <span class="text-danger">*</span></label>
-              <select class="form-select" id="singleExpenseSelect" required>
-                <option value="">Choose an expense...</option>
-              </select>
-              <div id="singleExpenseDropdown" class="mt-2" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; display: none;">
-                <!-- Expense list will be populated here -->
-              </div>
+              <div id="singleExpenseDropdown" class="mt-2" style="max-height:250px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; display:none;"></div>
             </div>
             <div class="mb-3">
               <label for="singleNominal" class="form-label">Nominal Rp <span class="text-danger">*</span></label>
               <input type="number" class="form-control" id="singleNominal" placeholder="e.g., 50000" required>
+            </div>
+            <div class="mb-3">
+              <label for="singleExpenseShift" class="form-label">Shift</label>
+              <select class="form-select" id="singleExpenseShift">
+                <option value="">Choose...</option>
+                <option value="pagi">Pagi</option>
+                <option value="siang">Siang</option>
+              </select>
             </div>
             <div class="mb-3">
               <label for="singleDescription" class="form-label">Description</label>
@@ -122,7 +123,7 @@
           <div class="mb-3">
             <label for="bulkExpenseFile" class="form-label">Choose Excel File <span class="text-danger">*</span></label>
             <input type="file" class="form-control" id="bulkExpenseFile" accept=".xlsx,.xls">
-            <small class="text-muted d-block mt-2">Columns: Tanggal, Pengeluaran, Nominal, Deskripsi</small>
+            <small class="text-muted d-block mt-2">Columns: Tanggal, Pengeluaran, Nominal, Shift, Deskripsi</small>
           </div>
 
           <!-- Preview Table -->
@@ -135,6 +136,7 @@
                     <th>Date</th>
                     <th>Expense</th>
                     <th>Nominal</th>
+                    <th>Shift</th>
                     <th>Description</th>
                   </tr>
                 </thead>
@@ -204,14 +206,32 @@
     let searchTimeout;
 
     function showAlert(message, type = 'info') {
-      const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>`;
-      const container = document.createElement('div');
-      container.innerHTML = alertHtml;
-      document.body.insertBefore(container.firstElementChild, document.body.firstChild);
+  const alertHtml = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  `;
+
+  const container = document.createElement('div');
+  container.innerHTML = alertHtml;
+
+  // Find the navbar’s parent page container
+  const layoutPage = document.querySelector('.layout-page');
+
+  if (layoutPage) {
+    // Insert as the first element inside layout-page, AFTER navbar
+    const navbar = layoutPage.querySelector('.layout-navbar');
+    if (navbar && navbar.nextSibling) {
+      layoutPage.insertBefore(container.firstElementChild, navbar.nextSibling);
+    } else {
+      layoutPage.appendChild(container.firstElementChild);
     }
+  } else {
+    // Fallback (shouldn't happen)
+    document.body.appendChild(container.firstElementChild);
+  }
+}
 
     async function fetchExpenseHistories(page = 1) {
       try {
@@ -254,6 +274,7 @@
           <td>${formattedDate}</td>
           <td><strong>${String(h.expense?.name || 'N/A').toUpperCase()}</strong></td>
           <td>${nominalDisplay}</td>
+          <td>${h.shift ? String(h.shift).toUpperCase() : '-'}</td>
           <td>${description}</td>
           <td>
             <div class="d-flex">
@@ -294,6 +315,7 @@
       const date = document.getElementById('singleExpenseDate').value;
       const expenseName = document.getElementById('singleExpenseSearch').value;
       const nominal = document.getElementById('singleNominal').value;
+      const shift = document.getElementById('singleExpenseShift').value;
       const description = document.getElementById('singleDescription').value;
 
       if (!date || !expenseName || !nominal) {
@@ -305,6 +327,7 @@
         date,
         expense_name: expenseName.toLowerCase(),
         nominal: parseFloat(nominal),
+        shift: shift || null,
         description: description || null
       }];
 
@@ -356,6 +379,7 @@
             date: row['Tanggal'] || '',
             expense_name: (row['Jenis Pengeluaran'] || '').toLowerCase().trim(),
             nominal: Number(row['Nominal'] || 0),
+            shift: (row['Shift'] || '').toLowerCase().trim() || null,
             description: row['Deskripsi'] || null
           })).filter(r => r.date && r.expense_name && r.nominal > 0);
 
@@ -381,6 +405,7 @@
           <td>${item.date}</td>
           <td>${item.expense_name.toUpperCase()}</td>
           <td>${nominalDisplay}</td>
+          <td>${item.shift ? item.shift.toUpperCase() : '-'}</td>
           <td>${item.description || '-'}</td>
         `;
         tbody.appendChild(row);
@@ -488,38 +513,31 @@
       dropdown.innerHTML = '';
       if (!expenses || expenses.length === 0) {
         dropdown.innerHTML = '<div class="p-2 text-muted">No expenses found</div>';
+        dropdown.style.display = 'block';
         return;
       }
       expenses.forEach(e => {
         const div = document.createElement('div');
-        div.className = 'p-2 border-bottom cursor-pointer';
+        div.className = 'p-2 border-bottom';
         div.style.cursor = 'pointer';
-        div.innerHTML = `<div><strong>${e.name || 'Unknown'}</strong></div>`;
-        div.onclick = () => selectSingleExpense(e.id, e.name || 'Unknown');
+        div.innerHTML = `<strong>${e.name || 'Unknown'}</strong>`;
+        div.onclick = () => selectSingleExpense(e.name || 'Unknown');
         dropdown.appendChild(div);
       });
+      dropdown.style.display = 'block';
     }
 
-    function selectSingleExpense(id, name) {
+    function selectSingleExpense(name) {
       document.getElementById('singleExpenseSearch').value = name;
-      document.getElementById('singleExpenseSelect').value = id;
       document.getElementById('singleExpenseDropdown').style.display = 'none';
     }
 
     document.getElementById('singleExpenseSearch').addEventListener('input', (e) => {
       const search = e.target.value.trim();
       if (search.length > 0) {
-        document.getElementById('singleExpenseDropdown').style.display = 'block';
         fetchExpensesForSelection(search);
       } else {
         document.getElementById('singleExpenseDropdown').style.display = 'none';
-      }
-    });
-
-    document.getElementById('singleExpenseSelect').addEventListener('focus', () => {
-      if (singleExpensesCache.length === 0) {
-        document.getElementById('singleExpenseDropdown').style.display = 'block';
-        fetchExpensesForSelection();
       }
     });
 

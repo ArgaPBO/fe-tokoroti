@@ -43,6 +43,7 @@
             <th>Produk</th>
             <th>Harga Produk</th>
             <th>Jumlah</th>
+            <th>Shift</th>
             <th>Diskon</th>
             <th>Harga Total</th>
             <th>Jenis Transaksi</th>
@@ -116,6 +117,20 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
+                  <label for="singleShift" class="form-label">Shift</label>
+                  <select class="form-select" id="singleShift">
+                    <option value="">Choose...</option>
+                    <option value="pagi">Pagi</option>
+                    <option value="siang">Siang</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
                   <label for="singleDiscPercent" class="form-label">Discount %</label>
                   <input type="number" class="form-control" id="singleDiscPercent" placeholder="e.g., 10" step="0.01">
                 </div>
@@ -149,7 +164,7 @@
           <div class="mb-3">
             <label for="bulkFile" class="form-label">Choose Excel File <span class="text-danger">*</span></label>
             <input type="file" class="form-control" id="bulkFile" accept=".xlsx,.xls">
-            <small class="text-muted d-block mt-2">Columns: Tanggal, Produk, Jumlah, Jenis Penjualan, Diskon (Persen), Diskon (Nominal)</small>
+            <small class="text-muted d-block mt-2">Columns: Tanggal, Produk, Jumlah, Shift, Jenis Penjualan, Diskon (Persen), Diskon (Nominal)</small>
           </div>
           {{-- <button type="button" class="btn btn-warning mb-3" id="previewBulkBtn">
             <i class="ri-eye-line me-1"></i> Preview Data
@@ -165,6 +180,7 @@
                     <th>Date</th>
                     <th>Product</th>
                     <th>Qty</th>
+                    <th>Shift</th>
                     <th>Type</th>
                     <th>Disc %</th>
                     <th>Disc Rp</th>
@@ -238,14 +254,32 @@ let selectedSingleProductId = null;
     let searchTimeout;
 
     function showAlert(message, type = 'info') {
-      const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>`;
-      const container = document.createElement('div');
-      container.innerHTML = alertHtml;
-      document.body.insertBefore(container.firstElementChild, document.body.firstChild);
+  const alertHtml = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  `;
+
+  const container = document.createElement('div');
+  container.innerHTML = alertHtml;
+
+  // Find the navbar’s parent page container
+  const layoutPage = document.querySelector('.layout-page');
+
+  if (layoutPage) {
+    // Insert as the first element inside layout-page, AFTER navbar
+    const navbar = layoutPage.querySelector('.layout-navbar');
+    if (navbar && navbar.nextSibling) {
+      layoutPage.insertBefore(container.firstElementChild, navbar.nextSibling);
+    } else {
+      layoutPage.appendChild(container.firstElementChild);
     }
+  } else {
+    // Fallback (shouldn't happen)
+    document.body.appendChild(container.firstElementChild);
+  }
+}
 
     async function fetchHistories(page = 1) {
       try {
@@ -274,7 +308,7 @@ let selectedSingleProductId = null;
       const tbody = document.getElementById('historiesTableBody');
       tbody.innerHTML = '';
       if (!histories || histories.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No records found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center">No records found</td></tr>';
         return;
       }
       histories.forEach(h => {
@@ -300,6 +334,7 @@ let selectedSingleProductId = null;
           <td><strong>${String(h.product?.name || 'N/A').toUpperCase()}</strong></td>
           <td>${priceDisplay}</td>
           <td>${h.quantity}</td>
+          <td>${h.shift ? String(h.shift).toUpperCase() : '-'}</td>
           <td>${discountDisplay}</td>
           <td>${totalPriceDisplay}</td>
           <td><span class="badge bg-label-info">${String(h.transaction_type || '-').toUpperCase()}</span></td>
@@ -344,6 +379,7 @@ let selectedSingleProductId = null;
       // const productId = document.getElementById('singleProductSelect').value;
       const qty = document.getElementById('singleQty').value;
       const type = document.getElementById('singleType').value;
+      const shift = document.getElementById('singleShift').value;
       const discPercent = document.getElementById('singleDiscPercent').value;
       const discPrice = document.getElementById('singleDiscPrice').value;
 
@@ -363,6 +399,7 @@ let selectedSingleProductId = null;
         product_name: productName.toLowerCase(),
         quantity: parseInt(qty),
         transaction_type: type.toLowerCase(),
+        shift: shift || null,
         discount_percent: discPercent ? parseFloat(discPercent) : null,
         discount_price: discPrice ? parseFloat(discPrice) : null
       }];
@@ -414,6 +451,7 @@ let selectedSingleProductId = null;
             date: row['Tanggal'] || '',
             product_name: (row['Produk'] || '').toLowerCase().trim(),
             quantity: Number(row['Jumlah'] || 0),
+            shift: (row['Shift'] || '').toLowerCase().trim() || null,
             transaction_type: (row['Jenis Penjualan'] || '').toLowerCase().trim(),
             discount_percent: row['Diskon (Persen)'] ? String(row['Diskon (Persen)']).replace(/%/g, '') : null,
             discount_price: row['Diskon (Nominal)'] || null
@@ -442,6 +480,7 @@ let selectedSingleProductId = null;
           <td>${item.date}</td>
           <td>${item.product_name.toUpperCase()}</td>
           <td>${item.quantity}</td>
+          <td>${item.shift ? item.shift.toUpperCase() : '-'}</td>
           <td>${item.transaction_type.toUpperCase()}</td>
           <td>${discountPercentDisplay}</td>
           <td>${discountPriceDisplay}</td>
