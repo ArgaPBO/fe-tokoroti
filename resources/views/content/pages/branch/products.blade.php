@@ -62,20 +62,19 @@
         <div class="modal-body">
           <form id="addBranchProductForm">
             <div class="mb-3">
-              <label for="addProductSearch" class="form-label">Search Product</label>
-              <input type="text" class="form-control" id="addProductSearch" placeholder="Search products...">
-            </div>
+  <label for="addProductSearch" class="form-label">Search Product</label>
+  <input type="text" class="form-control" id="addProductSearch" placeholder="Search products...">
 
-            <div class="mb-3">
-              <label for="addProductSelect" class="form-label">Select Product</label>
-              <select class="form-control" id="addProductSelect" required>
-                <option value="">Choose a product...</option>
-              </select>
-              <div id="productListDropdown" class="mt-2" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; display: none;">
-                <!-- Product list will be populated here -->
-              </div>
-              <small class="text-muted d-block mt-2">Base Price: <span id="addProductBasePrice">-</span></small>
-            </div>
+  <div id="productListDropdown"
+       class="mt-2"
+       style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; display:none;">
+  </div>
+
+  <small class="text-muted d-block mt-2">
+    Base Price: <span id="addProductBasePrice">-</span>
+  </small>
+</div>
+
 
             <div class="mb-3">
               <label for="addBranchPrice" class="form-label">Branch Price</label>
@@ -291,7 +290,7 @@
     function selectProduct(id, name, price) {
       selectedProductId = id;
       document.getElementById('addProductSearch').value = name;
-      document.getElementById('addProductSelect').value = id;
+      // document.getElementById('addProductSelect').value = id;
       document.getElementById('addProductBasePrice').textContent = Number(price).toLocaleString();
       document.getElementById('productListDropdown').style.display = 'none';
     }
@@ -328,16 +327,17 @@
     });
 
     // Handle product select focus
-    document.getElementById('addProductSelect').addEventListener('focus', () => {
-      if (productsCache.length === 0) {
-        document.getElementById('productListDropdown').style.display = 'block';
-        fetchProductsForSelection();
-      }
-    });
+    // document.getElementById('addProductSelect').addEventListener('focus', () => {
+    //   if (productsCache.length === 0) {
+    //     document.getElementById('productListDropdown').style.display = 'block';
+    //     fetchProductsForSelection();
+    //   }
+    // });
 
     // Save new branch product
     document.getElementById('saveBranchProductBtn').addEventListener('click', async () => {
-      const productId = selectedProductId || Number(document.getElementById('addProductSelect').value);
+      const productId = selectedProductId;
+      //  || Number(document.getElementById('addProductSelect').value);
       const branchPrice = Number(document.getElementById('addBranchPrice').value);
       if (!productId || !branchPrice) { showAlert('Please select a product and enter branch price', 'warning'); return; }
       try {

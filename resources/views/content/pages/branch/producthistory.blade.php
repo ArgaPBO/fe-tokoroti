@@ -83,18 +83,18 @@
               <input type="date" class="form-control" id="singleDate" required>
             </div>
             <div class="mb-3">
-              <label for="singleProductSearch" class="form-label">Product Name <span class="text-danger">*</span></label>
+              {{-- <label for="singleProductSearch" class="form-label">Product Name <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="singleProductSearch" placeholder="Search products...">
             </div>
-            <div class="mb-3">
-              <label for="singleProductSelect" class="form-label">Select Product <span class="text-danger">*</span></label>
-              <select class="form-select" id="singleProductSelect" required>
-                <option value="">Choose a product...</option>
-              </select>
-              <div id="singleProductDropdown" class="mt-2" style="max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; display: none;">
-                <!-- Product list will be populated here -->
-              </div>
-            </div>
+            <div class="mb-3"> --}}
+  <label for="singleProductSearch" class="form-label">Product Name <span class="text-danger">*</span></label>
+  <input type="text" class="form-control" id="singleProductSearch" placeholder="Search products...">
+
+  <div id="singleProductDropdown"
+       class="mt-2"
+       style="max-height:250px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; display:none;"></div>
+</div>
+
             <div class="row">
               <div class="col-md-6">
                 <div class="mb-3">
@@ -177,6 +177,9 @@
           </div>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="downloadTemplateBtn">
+            <i class="ri-download-line me-1"></i> Download Template
+          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="submitBulkBtn">Submit</button>
         </div>
@@ -212,6 +215,7 @@
     let currentPage = 1;
     let bulkDataCache = [];
     let recordToDelete = null;
+let selectedSingleProductId = null;
 
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -524,64 +528,120 @@
     });
 
     // Product search for single insertion
-    let singleProductsCache = [];
+    // let singleProductsCache = [];
 
-    async function fetchBranchProductsForSelection(search = '') {
-      try {
-        const url = search 
-          ? `${API_URL}/branch/products?search=${encodeURIComponent(search)}` 
-          : `${API_URL}/branch/products`;
-        const res = await fetch(url, { headers: authHeaders() });
-        const data = await res.json();
-        singleProductsCache = data.data || [];
-        renderSingleProductDropdown(data.data);
-      } catch (err) {
-        console.error('Error fetching branch products for selection', err);
-      }
-    }
+    // async function fetchBranchProductsForSelection(search = '') {
+    //   try {
+    //     const url = search 
+    //       ? `${API_URL}/branch/products?search=${encodeURIComponent(search)}` 
+    //       : `${API_URL}/branch/products`;
+    //     const res = await fetch(url, { headers: authHeaders() });
+    //     const data = await res.json();
+    //     singleProductsCache = data.data || [];
+    //     renderSingleProductDropdown(data.data);
+    //   } catch (err) {
+    //     console.error('Error fetching branch products for selection', err);
+    //   }
+    // }
 
-    function renderSingleProductDropdown(products) {
-      const dropdown = document.getElementById('singleProductDropdown');
-      dropdown.innerHTML = '';
-      if (!products || products.length === 0) {
-        dropdown.innerHTML = '<div class="p-2 text-muted">No products found</div>';
-        return;
-      }
-      products.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'p-2 border-bottom cursor-pointer';
-        div.style.cursor = 'pointer';
-        div.innerHTML = `
-          <div><strong>${p.product?.name || 'Unknown'}</strong></div>
-          <small class="text-muted">Branch Price: Rp ${Number(p.branch_price || 0).toLocaleString('id-ID')}</small>
-        `;
-        div.onclick = () => selectSingleProduct(p.id, p.product?.name || 'Unknown');
-        dropdown.appendChild(div);
-      });
-    }
+    // function renderSingleProductDropdown(products) {
+    //   const dropdown = document.getElementById('singleProductDropdown');
+    //   dropdown.innerHTML = '';
+    //   if (!products || products.length === 0) {
+    //     dropdown.innerHTML = '<div class="p-2 text-muted">No products found</div>';
+    //     return;
+    //   }
+    //   products.forEach(p => {
+    //     const div = document.createElement('div');
+    //     div.className = 'p-2 border-bottom cursor-pointer';
+    //     div.style.cursor = 'pointer';
+    //     div.innerHTML = `
+    //       <div><strong>${p.product?.name || 'Unknown'}</strong></div>
+    //       <small class="text-muted">Branch Price: Rp ${Number(p.branch_price || 0).toLocaleString('id-ID')}</small>
+    //     `;
+    //     div.onclick = () => selectSingleProduct(p.id, p.product?.name || 'Unknown');
+    //     dropdown.appendChild(div);
+    //   });
+    // }
 
-    function selectSingleProduct(id, name) {
-      document.getElementById('singleProductSearch').value = name;
-      document.getElementById('singleProductSelect').value = id;
-      document.getElementById('singleProductDropdown').style.display = 'none';
-    }
+    // function selectSingleProduct(id, name) {
+    //   document.getElementById('singleProductSearch').value = name;
+    //   document.getElementById('singleProductSelect').value = id;
+    //   document.getElementById('singleProductDropdown').style.display = 'none';
+    // }
 
-    document.getElementById('singleProductSearch').addEventListener('input', (e) => {
-      const search = e.target.value.trim();
-      if (search.length > 0) {
-        document.getElementById('singleProductDropdown').style.display = 'block';
-        fetchBranchProductsForSelection(search);
-      } else {
-        document.getElementById('singleProductDropdown').style.display = 'none';
-      }
-    });
+    // document.getElementById('singleProductSearch').addEventListener('input', (e) => {
+    //   const search = e.target.value.trim();
+    //   if (search.length > 0) {
+    //     document.getElementById('singleProductDropdown').style.display = 'block';
+    //     fetchBranchProductsForSelection(search);
+    //   } else {
+    //     document.getElementById('singleProductDropdown').style.display = 'none';
+    //   }
+    // });
 
-    document.getElementById('singleProductSelect').addEventListener('focus', () => {
-      if (singleProductsCache.length === 0) {
-        document.getElementById('singleProductDropdown').style.display = 'block';
-        fetchBranchProductsForSelection();
-      }
-    });
+    // document.getElementById('singleProductSelect').addEventListener('focus', () => {
+    //   if (singleProductsCache.length === 0) {
+    //     document.getElementById('singleProductDropdown').style.display = 'block';
+    //     fetchBranchProductsForSelection();
+    //   }
+    // });
+let singleProductsCache = [];
+
+async function fetchBranchProductsForSelection(search = '') {
+  try {
+    const url = search
+      ? `${API_URL}/branch/products?search=${encodeURIComponent(search)}`
+      : `${API_URL}/branch/products`;
+
+    const res = await fetch(url, { headers: authHeaders() });
+    const data = await res.json();
+    singleProductsCache = data.data || [];
+    renderSingleProductDropdown(singleProductsCache);
+  } catch (err) {
+    console.error('Error fetching products', err);
+  }
+}
+
+function renderSingleProductDropdown(products) {
+  const dropdown = document.getElementById('singleProductDropdown');
+  dropdown.innerHTML = '';
+
+  if (!products || products.length === 0) {
+    dropdown.innerHTML = '<div class="p-2 text-muted">No products found</div>';
+    dropdown.style.display = 'block';
+    return;
+  }
+
+  products.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'p-2 border-bottom';
+    div.style.cursor = 'pointer';
+    div.innerHTML = `
+      <strong>${p.product?.name || 'Unknown'}</strong><br>
+      <small class="text-muted">Branch Price: Rp ${Number(p.branch_price || 0).toLocaleString('id-ID')}</small>
+    `;
+    div.onclick = () => selectSingleProduct(p.id, p.product?.name);
+    dropdown.appendChild(div);
+  });
+
+  dropdown.style.display = 'block';
+}
+
+function selectSingleProduct(id, name) {
+  selectedSingleProductId = id;
+  document.getElementById('singleProductSearch').value = name;
+  document.getElementById('singleProductDropdown').style.display = 'none';
+}
+
+document.getElementById('singleProductSearch').addEventListener('input', (e) => {
+  const search = e.target.value.trim();
+  if (search.length > 0) {
+    fetchBranchProductsForSelection(search);
+  } else {
+    document.getElementById('singleProductDropdown').style.display = 'none';
+  }
+});
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
@@ -589,6 +649,16 @@
       document.getElementById('startDate').value = formatForInput(getFirstDayOfMonth());
       document.getElementById('endDate').value = formatForInput(getLastDayOfMonth());
       fetchHistories(1);
+    });
+
+    // Download template functionality
+    document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = '{{ asset("assets/templates/product_history_template.xlsx") }}';
+      link.download = 'product_history_template.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
   </script>
 

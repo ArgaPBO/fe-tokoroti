@@ -145,6 +145,9 @@
           </div>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="downloadTemplateBtn">
+            <i class="ri-download-line me-1"></i> Download Template
+          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="submitBulkExpenseBtn">Submit</button>
         </div>
@@ -526,6 +529,16 @@
       document.getElementById('expenseStartDate').value = formatForInput(getFirstDayOfMonth());
       document.getElementById('expenseEndDate').value = formatForInput(getLastDayOfMonth());
       fetchExpenseHistories(1);
+    });
+
+    // Download template functionality
+    document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = '{{ asset("assets/templates/expense_history_template.xlsx") }}';
+      link.download = 'expense_history_template.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
   </script>
 

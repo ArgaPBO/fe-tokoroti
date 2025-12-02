@@ -40,12 +40,12 @@ Route::prefix("admin")
 Route::prefix("branch")
   ->name("branch.")
   ->group(function () {
-    Route::view("/", "content.pages.branch.dashboard")->name("dashboard");
+    Route::view("/", "content.pages.branch.branchdetail")->name("dashboard");
     Route::view("/products", "content.pages.branch.products")->name("products");
     Route::view("/history/products", "content.pages.branch.producthistory")->name("producthistory");
     Route::view("/history/expenses", "content.pages.branch.expensehistory")->name("expensehistory");
     Route::view("/export/labarugi", "content.pages.labarugi")->name("labarugi");
-    Route::view("/branch", "content.pages.branch.branchdetail")->name("branchdetail1");
+    // Route::view("/branch", "content.pages.branch.branchdetail")->name("branchdetail1");
   });
 
   
