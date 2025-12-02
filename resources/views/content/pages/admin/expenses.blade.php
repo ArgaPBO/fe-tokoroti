@@ -10,8 +10,10 @@
     <!-- ===== Tombol Aksi (Action Bar) ===== -->
     <div class="card-header d-flex flex-column flex-md-row align-items-center justify-content-between">
 
-      {{-- Dibiarkan kosong di kiri agar tombol "Add Expense" di kanan --}}
-      <div></div>
+      {{-- Search and filter --}}
+      <div>
+        <input type="text" id="searchExpense" class="form-control" placeholder="Search expense name..." />
+      </div>
 
       {{-- Tombol Tambah Expense --}}
       <div class="d-flex">
@@ -125,6 +127,7 @@
     let currentPage = 1;
     let currentExpenseId = null;
     let expenseToDelete = null;
+    let searchTimeout;
 
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -140,10 +143,26 @@
       return headers;
     }
 
+    function showAlert(message, type = 'success') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      const container = document.querySelector('.layout-page') || document.body;
+      container.insertBefore(alertDiv, container.firstChild);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+
     // Fetch expenses from API
     async function fetchExpenses(page = 1) {
       try {
-        const response = await fetch(`${API_URL}/expenses?page=${page}`, {
+        const search = document.getElementById('searchExpense').value.trim();
+        let url = `${API_URL}/expenses?page=${page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        
+        const response = await fetch(url, {
           headers: authHeaders()
         });
         const data = await response.json();
@@ -153,7 +172,7 @@
         currentPage = page;
       } catch (error) {
         console.error('Error fetching expenses:', error);
-        alert('Failed to load expenses');
+        showAlert('Failed to load expenses', 'danger');
       }
     }
 
@@ -225,7 +244,7 @@
         document.getElementById('editExpenseName').value = data.name;
       } catch (error) {
         console.error('Error loading expense:', error);
-        alert('Failed to load expense');
+        showAlert('Failed to load expense', 'danger');
       }
     }
 
@@ -239,7 +258,7 @@
       const name = document.getElementById('addExpenseName').value.trim();
       
       if (!name) {
-        alert('Please enter an expense name');
+        showAlert('Please enter an expense name', 'warning');
         return;
       }
 
@@ -253,16 +272,16 @@
         const data = await response.json();
         
         if (response.ok) {
-          alert(data.message || 'Expense created successfully');
+          showAlert(data.message || 'Expense created successfully', 'success');
           document.getElementById('addExpenseForm').reset();
           bootstrap.Modal.getInstance(document.getElementById('addExpenseModal')).hide();
           fetchExpenses(1);
         } else {
-          alert(data.message || 'Failed to create expense');
+          showAlert(data.message || 'Failed to create expense', 'danger');
         }
       } catch (error) {
         console.error('Error creating expense:', error);
-        alert('Error creating expense');
+        showAlert('Error creating expense', 'danger');
       }
     });
 
@@ -271,7 +290,7 @@
       const name = document.getElementById('editExpenseName').value.trim();
       
       if (!name) {
-        alert('Please enter an expense name');
+        showAlert('Please enter an expense name', 'warning');
         return;
       }
 
@@ -285,15 +304,15 @@
         const data = await response.json();
         
         if (response.ok) {
-          alert(data.message || 'Expense updated successfully');
+          showAlert(data.message || 'Expense updated successfully', 'success');
           bootstrap.Modal.getInstance(document.getElementById('editExpenseModal')).hide();
           fetchExpenses(currentPage);
         } else {
-          alert(data.message || 'Failed to update expense');
+          showAlert(data.message || 'Failed to update expense', 'danger');
         }
       } catch (error) {
         console.error('Error updating expense:', error);
-        alert('Error updating expense');
+        showAlert('Error updating expense', 'danger');
       }
     });
 
@@ -310,21 +329,25 @@
         const data = await response.json();
         
         if (response.ok) {
-          alert(data.message || 'Expense deleted successfully');
+          showAlert(data.message || 'Expense deleted successfully', 'success');
           bootstrap.Modal.getInstance(document.getElementById('deleteExpenseModal')).hide();
           fetchExpenses(currentPage);
         } else {
-          alert(data.message || 'Failed to delete expense');
+          showAlert(data.message || 'Failed to delete expense', 'danger');
         }
       } catch (error) {
         console.error('Error deleting expense:', error);
-        alert('Error deleting expense');
+        showAlert('Error deleting expense', 'danger');
       }
     });
 
     // Load expenses on page load
     document.addEventListener('DOMContentLoaded', function() {
       fetchExpenses(1);
+      document.getElementById('searchExpense').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchExpenses(1), 400);
+      });
     });
   </script>
 

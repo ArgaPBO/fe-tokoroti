@@ -39,7 +39,12 @@
         
       ]
     },
-
+{
+      "url": "/branch/branch",
+      "name": "Summary Cabang",
+      "icon": "menu-icon tf-icons ri-store-2-line",
+      "slug": "branch.dashboard"
+    },
     {
       "url": "",
       "name": "Export Laba Rugi",

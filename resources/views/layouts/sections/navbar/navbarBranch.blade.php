@@ -93,6 +93,7 @@
   </nav>
 
   <script>
+    let branchName1 = 'Branch';
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       return match ? decodeURIComponent(match[2]) : null;
@@ -125,6 +126,7 @@
         const branchName = data.branch?.name || 'Branch';
         const userName = data.user?.name || 'Unknown';
         document.getElementById('userDisplay').textContent = `${branchName} - ${userName}`;
+        branchName1 = branchName;
       } catch (err) {
         console.error('Error fetching user:', err);
         document.getElementById('userDisplay').textContent = 'Branch - Error';

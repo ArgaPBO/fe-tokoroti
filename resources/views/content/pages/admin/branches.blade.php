@@ -10,8 +10,10 @@
     <!-- ===== Tombol Aksi (Action Bar) ===== -->
     <div class="card-header d-flex flex-column flex-md-row align-items-center justify-content-between">
 
-      {{-- Dibiarkan kosong di kiri agar tombol "Add Branch" di kanan --}}
-      <div></div>
+      {{-- Search and filter --}}
+      <div>
+        <input type="text" id="searchBranch" class="form-control" placeholder="Search branch name..." />
+      </div>
 
       {{-- Tombol Sortir dan Tambah Produk --}}
       <div class="d-flex">
@@ -114,16 +116,33 @@
       const headers = { 'Content-Type': 'application/json' };
       const token = getCookie('token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      // include CSRF only when blade provides it
       const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
       if (csrf) headers['X-CSRF-TOKEN'] = csrf;
       return headers;
     }
 
+    function showAlert(message, type = 'info') {
+      const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>`;
+      const container = document.createElement('div');
+      container.innerHTML = alertHtml;
+      const layoutPage = document.querySelector('.layout-page');
+      if (layoutPage) {
+        layoutPage.insertBefore(container.firstChild, layoutPage.firstChild);
+      } else {
+        document.body.insertBefore(container.firstChild, document.body.firstChild);
+      }
+    }
+
     // Fetch branches from API
     async function fetchBranches(page = 1) {
       try {
-        const response = await fetch(`${API_URL}/branches?page=${page}`, {
+        const search = document.getElementById('searchBranch').value.trim();
+        let url = `${API_URL}/branches?page=${page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        const response = await fetch(url, {
           headers: authHeaders()
         });
         const data = await response.json();
@@ -133,7 +152,7 @@
         currentPage = page;
       } catch (error) {
         console.error('Error fetching branches:', error);
-        alert('Failed to load branches');
+        showAlert('Failed to load branches', 'danger');
       }
     }
 
@@ -207,7 +226,7 @@
       const name = document.getElementById('addBranchName').value.trim();
       
       if (!name) {
-        alert('Please enter a branch name');
+        showAlert('Please enter a branch name', 'warning');
         return;
       }
 
@@ -221,16 +240,16 @@
         const data = await response.json();
         
         if (response.ok) {
-          alert(data.message || 'Branch created successfully');
+          showAlert(data.message || 'Branch created successfully', 'success');
           document.getElementById('addBranchForm').reset();
           bootstrap.Modal.getInstance(document.getElementById('addBranchModal')).hide();
           fetchBranches(1);
         } else {
-          alert(data.message || 'Failed to create branch');
+          showAlert(data.message || 'Failed to create branch', 'danger');
         }
       } catch (error) {
         console.error('Error creating branch:', error);
-        alert('Error creating branch');
+        showAlert('Error creating branch', 'danger');
       }
     });
 
@@ -239,7 +258,7 @@
       const name = document.getElementById('editBranchName').value.trim();
       
       if (!name) {
-        alert('Please enter a branch name');
+        showAlert('Please enter a branch name', 'warning');
         return;
       }
 
@@ -253,15 +272,15 @@
         const data = await response.json();
         
         if (response.ok) {
-          alert(data.message || 'Branch updated successfully');
+          showAlert(data.message || 'Branch updated successfully', 'success');
           bootstrap.Modal.getInstance(document.getElementById('editBranchModal')).hide();
           fetchBranches(currentPage);
         } else {
-          alert(data.message || 'Failed to update branch');
+          showAlert(data.message || 'Failed to update branch', 'danger');
         }
       } catch (error) {
         console.error('Error updating branch:', error);
-        alert('Error updating branch');
+        showAlert('Error updating branch', 'danger');
       }
     });
 
@@ -275,13 +294,14 @@
         });
         const data = await res.json();
         if(res.ok){
-          alert(data.message || 'Branch deleted');
+          showAlert(data.message || 'Branch deleted', 'success');
           fetchBranches(currentPage);
         } else {
-          alert(data.message || 'Failed to delete branch');
+          showAlert(data.message || 'Failed to delete branch', 'danger');
         }
       } catch(err){
-        console.error(err); alert('Error deleting branch');
+        console.error(err);
+        showAlert('Error deleting branch', 'danger');
       }
     }
 
@@ -294,6 +314,13 @@
     // Load branches on page load
     document.addEventListener('DOMContentLoaded', function() {
       fetchBranches(1);
+      
+      // Wire search input
+      let searchTimeout = null;
+      document.getElementById('searchBranch').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchBranches(1), 400);
+      });
     });
   </script>
 

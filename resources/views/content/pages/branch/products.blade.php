@@ -9,6 +9,11 @@
 
     <!-- ===== Tombol Aksi (Action Bar) ===== -->
     <div class="card-header d-flex flex-column flex-md-row align-items-center justify-content-between">
+      {{-- Search and filter --}}
+      <div>
+        <input type="text" id="searchBranchProduct" class="form-control" placeholder="Search product name..." />
+      </div>
+
       {{-- Tombol Pemicu Modal "Add Product" --}}
       <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addBranchProductModal">
         <i class="ri-add-line me-1"></i> Add Branch Product
@@ -150,6 +155,7 @@
     let productToDelete = null;
     let selectedProductId = null;
     let productsCache = [];
+    let searchTimeout;
 
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -165,16 +171,32 @@
       return headers;
     }
 
+    function showAlert(message, type = 'success') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      const container = document.querySelector('.layout-page') || document.body;
+      container.insertBefore(alertDiv, container.firstChild);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+
     async function fetchBranchProducts(page = 1) {
       try {
-        const res = await fetch(`${API_URL}/branch/products?page=${page}`, { headers: authHeaders() });
+        const search = document.getElementById('searchBranchProduct').value.trim();
+        let url = `${API_URL}/branch/products?page=${page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        
+        const res = await fetch(url, { headers: authHeaders() });
         const data = await res.json();
         renderBranchProductTable(data.data);
         renderPagination(data);
         currentPage = page;
       } catch (err) {
         console.error('Error fetching branch products', err);
-        alert('Failed to load branch products');
+        showAlert('Failed to load branch products', 'danger');
       }
     }
 
@@ -285,7 +307,7 @@
         document.getElementById('editBranchPrice').value = data.branch_price || 0;
       } catch (err) {
         console.error('Error loading branch product', err);
-        alert('Failed to load branch product data');
+        showAlert('Failed to load branch product data', 'danger');
       }
     }
 
@@ -317,7 +339,7 @@
     document.getElementById('saveBranchProductBtn').addEventListener('click', async () => {
       const productId = selectedProductId || Number(document.getElementById('addProductSelect').value);
       const branchPrice = Number(document.getElementById('addBranchPrice').value);
-      if (!productId || !branchPrice) { alert('Please select a product and enter branch price'); return; }
+      if (!productId || !branchPrice) { showAlert('Please select a product and enter branch price', 'warning'); return; }
       try {
         const res = await fetch(`${API_URL}/branch/products`, {
           method: 'POST',
@@ -326,7 +348,7 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message || 'Branch product created');
+          showAlert(data.message || 'Branch product created', 'success');
           document.getElementById('addBranchProductForm').reset();
           selectedProductId = null;
           document.getElementById('productListDropdown').style.display = 'none';
@@ -334,16 +356,16 @@
           bootstrap.Modal.getInstance(document.getElementById('addBranchProductModal')).hide();
           fetchBranchProducts(1);
         } else {
-          alert(data.message || 'Failed to create branch product');
+          showAlert(data.message || 'Failed to create branch product', 'danger');
         }
-      } catch (err) { console.error(err); alert('Error creating branch product'); }
+      } catch (err) { console.error(err); showAlert('Error creating branch product', 'danger'); }
     });
 
     // Save edited branch product
     document.getElementById('saveEditBranchProductBtn').addEventListener('click', async () => {
       const id = document.getElementById('editProductId').value;
       const branchPrice = Number(document.getElementById('editBranchPrice').value);
-      if (!id || !branchPrice) { alert('Please enter branch price'); return; }
+      if (!id || !branchPrice) { showAlert('Please enter branch price', 'warning'); return; }
       try {
         const res = await fetch(`${API_URL}/branch/products/${id}`, {
           method: 'PUT',
@@ -352,13 +374,13 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message || 'Branch product updated');
+          showAlert(data.message || 'Branch product updated', 'success');
           bootstrap.Modal.getInstance(document.getElementById('editBranchProductModal')).hide();
           fetchBranchProducts(currentPage);
         } else {
-          alert(data.message || 'Failed to update branch product');
+          showAlert(data.message || 'Failed to update branch product', 'danger');
         }
-      } catch (err) { console.error(err); alert('Error updating branch product'); }
+      } catch (err) { console.error(err); showAlert('Error updating branch product', 'danger'); }
     });
 
     // Confirm delete
@@ -371,15 +393,21 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message || 'Branch product removed');
+          showAlert(data.message || 'Branch product removed', 'success');
           bootstrap.Modal.getInstance(document.getElementById('deleteBranchProductModal')).hide();
           fetchBranchProducts(currentPage);
         } else {
-          alert(data.message || 'Failed to remove branch product');
+          showAlert(data.message || 'Failed to remove branch product', 'danger');
         }
-      } catch (err) { console.error(err); alert('Error removing branch product'); }
+      } catch (err) { console.error(err); showAlert('Error removing branch product', 'danger'); }
     });
 
-    document.addEventListener('DOMContentLoaded', () => fetchBranchProducts(1));
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchBranchProducts(1);
+      document.getElementById('searchBranchProduct').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchBranchProducts(1), 400);
+      });
+    });
   </script>
 @endsection

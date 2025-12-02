@@ -1,6 +1,6 @@
-@extends('layouts.contentNavbarLayout')
+@extends('layouts.contentNavbarLayoutBranch')
 
-@section('title', 'Branch Detail')
+@section('title', 'Branch Overview')
 
 @section('content')
 
@@ -105,34 +105,29 @@
   function getLastDayOfMonth(){ const now = new Date(); return new Date(now.getFullYear(), now.getMonth()+1, 0); }
   function formatForInput(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
 
-  const branchId = getQueryParam('id');
-  if (!branchId) {
-    document.getElementById('branchName').textContent = 'Branch ID missing in URL';
-  }
-
   // initialize shared date inputs (startDate / endDate)
   document.getElementById('startDate').value = formatForInput(getFirstDayOfMonth());
   document.getElementById('endDate').value = formatForInput(getLastDayOfMonth());
 
-  // fetch branch info
+  // fetch branch info from authenticated user
   async function fetchBranch(){
     try{
-      const res = await fetch(`${API_URL}/branches/${branchId}`, { headers: authHeaders(), credentials: 'include' });
+      const res = await fetch(`${API_URL}/branch`, { headers: authHeaders(), credentials: 'include' });
       if(!res.ok) throw new Error('Failed to fetch branch');
       const data = await res.json();
-      document.getElementById('branchName').textContent = data.name || 'Branch';
-    //   document.getElementById('branchMeta').textContent = `ID: ${data.id}`;
+      document.getElementById('branchName').textContent = branchName1 || 'Branch';
+      // document.getElementById('branchMeta').textContent = `ID: ${data.id}`;
     }catch(e){ console.error(e); document.getElementById('branchName').textContent = 'Error loading branch'; }
   }
 
-  // products
+  // products - API gets branch_id from authenticated user
   let productsPage = 1;
   async function fetchProducts(page=1){
     productsPage = page;
     const search = document.getElementById('productSearch').value.trim();
     const start = document.getElementById('startDate').value;
     const end = document.getElementById('endDate').value;
-    let url = `${API_URL}/branches/${branchId}/products?page=${page}`;
+    let url = `${API_URL}/branch/products?page=${page}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (start) url += `&start_date=${encodeURIComponent(start)}`;
     if (end) url += `&end_date=${encodeURIComponent(end)}`;
@@ -146,11 +141,9 @@
     const rows = data.data || data;
     const tbody = document.getElementById('productsTableBody');
     tbody.innerHTML = '';
-    if(!rows || rows.length===0){ tbody.innerHTML = '<tr><td colspan="5" class="text-center">No products found</td></tr>'; document.getElementById('productsTotal').textContent='-'; renderProductsPagination(data); return; }
-    let total=0;
+    if(!rows || rows.length===0){ tbody.innerHTML = '<tr><td colspan="9" class="text-center">No products found</td></tr>'; renderProductsPagination(data); return; }
     rows.forEach((p, idx)=>{
       const revenue = Number(p.total_revenue || 0);
-      total += revenue;
       const tr = document.createElement('tr');
       const retail = p.retail_percent ? parseFloat(p.retail_percent).toFixed(2) : '0.00';
       const pesanan = p.pesanan_percent ? parseFloat(p.pesanan_percent).toFixed(2) : '0.00';
@@ -159,7 +152,6 @@
       tr.innerHTML = `<td>${idx+1}</td><td>${p.product?.name || '—'}</td><td class="text-end">${formatCurrency(p.branch_price || 0)}</td><td class="text-end">${p.total_quantity || 0}</td><td class="text-end">${formatCurrency(revenue)}</td><td class="text-end">${retail}%</td><td class="text-end">${pesanan}%</td><td class="text-end">${pagi}%</td><td class="text-end">${siang}%</td>`;
       tbody.appendChild(tr);
     });
-    // totals are limited by pagination; omitted by default per request
     renderProductsPagination(data);
   }
 
@@ -171,14 +163,14 @@
     const nxt = document.createElement('li'); nxt.className = `page-item ${data.current_page===data.last_page ? 'disabled':''}`; nxt.innerHTML = `<a class="page-link" href="#" onclick="fetchProducts(${data.current_page+1})">Next</a>`; list.appendChild(nxt);
   }
 
-  // expenses
+  // expenses - API gets branch_id from authenticated user
   let expensesPage = 1;
   async function fetchExpenses(page=1){
     expensesPage = page;
     const search = document.getElementById('expenseSearch').value.trim();
     const start = document.getElementById('startDate').value;
     const end = document.getElementById('endDate').value;
-    let url = `${API_URL}/branches/${branchId}/expenses?page=${page}`;
+    let url = `${API_URL}/branch/expenses?page=${page}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (start) url += `&start_date=${encodeURIComponent(start)}`;
     if (end) url += `&end_date=${encodeURIComponent(end)}`;
@@ -192,11 +184,9 @@
     const rows = data.data || data;
     const tbody = document.getElementById('expensesTableBody');
     tbody.innerHTML = '';
-    if(!rows || rows.length===0){ tbody.innerHTML = '<tr><td colspan="3" class="text-center">No expenses found</td></tr>'; document.getElementById('expensesTotal').textContent='-'; renderExpensesPagination(data); return; }
-    let total=0;
+    if(!rows || rows.length===0){ tbody.innerHTML = '<tr><td colspan="5" class="text-center">No expenses found</td></tr>'; renderExpensesPagination(data); return; }
     rows.forEach((r, idx)=>{
       const nominal = Number(r.total_nominal || 0);
-      total += nominal;
       const tr = document.createElement('tr');
       const name = r.expense?.name || (r.name || '—');
       const pagi = r.pagi_percent ? parseFloat(r.pagi_percent).toFixed(2) : '0.00';
@@ -204,7 +194,6 @@
       tr.innerHTML = `<td>${idx+1}</td><td>${name}</td><td class="text-end">${formatCurrency(nominal)}</td><td class="text-end">${pagi}%</td><td class="text-end">${siang}%</td>`;
       tbody.appendChild(tr);
     });
-    // totals are limited by pagination; omitted by default per request
     renderExpensesPagination(data);
   }
 
@@ -231,14 +220,14 @@
     e.preventDefault();
     const start = document.getElementById('startDate').value;
     const end = document.getElementById('endDate').value;
-    const url = `/admin/export/labarugi?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&branch_id=${encodeURIComponent(branchId)}`;
+    const url = `/branch/export/labarugi?start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}`;
     window.location.href = url;
   });
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    if(branchId) fetchBranch();
-    if(branchId) fetchProducts(1);
-    if(branchId) fetchExpenses(1);
+    fetchBranch();
+    fetchProducts(1);
+    fetchExpenses(1);
   });
 
 </script>

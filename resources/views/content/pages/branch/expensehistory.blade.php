@@ -19,9 +19,17 @@
     <!-- ===== Filter Bar ===== -->
     <div class="card-body pb-0">
       <div class="row g-3">
+        <div class="col-md-3">
+          <label for="expenseStartDate" class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="expenseStartDate">
+        </div>
+        <div class="col-md-3">
+          <label for="expenseEndDate" class="form-label">End Date</label>
+          <input type="date" class="form-control" id="expenseEndDate">
+        </div>
         <div class="col-md-6">
-          <label for="filterExpenseDate" class="form-label">Filter by Date</label>
-          <input type="date" class="form-control" id="filterExpenseDate">
+          <label for="searchExpenseHistory" class="form-label">Search Expense</label>
+          <input type="text" class="form-control" id="searchExpenseHistory" placeholder="Search expense name...">
         </div>
       </div>
     </div>
@@ -186,6 +194,12 @@
       return headers;
     }
 
+    function getFirstDayOfMonth() { const now = new Date(); return new Date(now.getFullYear(), now.getMonth(), 1); }
+    function getLastDayOfMonth() { const now = new Date(); return new Date(now.getFullYear(), now.getMonth()+1, 0); }
+    function formatForInput(d) { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+
+    let searchTimeout;
+
     function showAlert(message, type = 'info') {
       const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
         ${message}
@@ -196,12 +210,17 @@
       document.body.insertBefore(container.firstElementChild, document.body.firstChild);
     }
 
-    async function fetchExpenseHistories(page = 1, dateFilter = null) {
+    async function fetchExpenseHistories(page = 1) {
       try {
         let url = `${API_URL}/branch/histories/expenses?page=${page}`;
-        if (dateFilter) {
-          url += `&date_from=${dateFilter}&date_to=${dateFilter}`;
-        }
+        const startDate = document.getElementById('expenseStartDate').value;
+        const endDate = document.getElementById('expenseEndDate').value;
+        const search = document.getElementById('searchExpenseHistory').value.trim();
+        
+        if (startDate) url += `&date_from=${encodeURIComponent(startDate)}`;
+        if (endDate) url += `&date_to=${encodeURIComponent(endDate)}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        
         const res = await fetch(url, { headers: authHeaders(), credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
@@ -435,8 +454,13 @@
     document.getElementById('bulkExpenseFile').addEventListener('change', handleExpenseFilePreview);
     document.getElementById('submitBulkExpenseBtn').addEventListener('click', submitBulkExpense);
     document.getElementById('confirmDeleteExpenseBtn').addEventListener('click', confirmDeleteExpense);
-    document.getElementById('filterExpenseDate').addEventListener('change', (e) => {
-      fetchExpenseHistories(1, e.target.value);
+    
+    // Date and search filter event listeners
+    document.getElementById('expenseStartDate').addEventListener('change', () => fetchExpenseHistories(1));
+    document.getElementById('expenseEndDate').addEventListener('change', () => fetchExpenseHistories(1));
+    document.getElementById('searchExpenseHistory').addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => fetchExpenseHistories(1), 400);
     });
 
     // Expense search for single insertion
@@ -498,6 +522,9 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
+      // Set default date range to current month
+      document.getElementById('expenseStartDate').value = formatForInput(getFirstDayOfMonth());
+      document.getElementById('expenseEndDate').value = formatForInput(getLastDayOfMonth());
       fetchExpenseHistories(1);
     });
   </script>

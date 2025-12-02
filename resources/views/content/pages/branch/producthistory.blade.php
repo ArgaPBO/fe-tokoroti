@@ -19,9 +19,17 @@
     <!-- ===== Filter Bar ===== -->
     <div class="card-body pb-0">
       <div class="row g-3">
+        <div class="col-md-3">
+          <label for="startDate" class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="startDate">
+        </div>
+        <div class="col-md-3">
+          <label for="endDate" class="form-label">End Date</label>
+          <input type="date" class="form-control" id="endDate">
+        </div>
         <div class="col-md-6">
-          <label for="filterDate" class="form-label">Filter by Date</label>
-          <input type="date" class="form-control" id="filterDate">
+          <label for="searchHistory" class="form-label">Search Product</label>
+          <input type="text" class="form-control" id="searchHistory" placeholder="Search product name...">
         </div>
       </div>
     </div>
@@ -219,6 +227,12 @@
       return headers;
     }
 
+    function getFirstDayOfMonth() { const now = new Date(); return new Date(now.getFullYear(), now.getMonth(), 1); }
+    function getLastDayOfMonth() { const now = new Date(); return new Date(now.getFullYear(), now.getMonth()+1, 0); }
+    function formatForInput(d) { const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+
+    let searchTimeout;
+
     function showAlert(message, type = 'info') {
       const alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
         ${message}
@@ -229,12 +243,17 @@
       document.body.insertBefore(container.firstElementChild, document.body.firstChild);
     }
 
-    async function fetchHistories(page = 1, dateFilter = null) {
+    async function fetchHistories(page = 1) {
       try {
         let url = `${API_URL}/branch/histories/products?page=${page}`;
-        if (dateFilter) {
-          url += `&date_from=${dateFilter}&date_to=${dateFilter}`;
-        }
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const search = document.getElementById('searchHistory').value.trim();
+        
+        if (startDate) url += `&date_from=${encodeURIComponent(startDate)}`;
+        if (endDate) url += `&date_to=${encodeURIComponent(endDate)}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        
         const res = await fetch(url, { headers: authHeaders() });
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
@@ -495,8 +514,13 @@
     document.getElementById('bulkFile').addEventListener('change', handleFilePreview);
     document.getElementById('submitBulkBtn').addEventListener('click', submitBulk);
     document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
-    document.getElementById('filterDate').addEventListener('change', (e) => {
-      fetchHistories(1, e.target.value);
+    
+    // Date and search filter event listeners
+    document.getElementById('startDate').addEventListener('change', () => fetchHistories(1));
+    document.getElementById('endDate').addEventListener('change', () => fetchHistories(1));
+    document.getElementById('searchHistory').addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => fetchHistories(1), 400);
     });
 
     // Product search for single insertion
@@ -561,6 +585,9 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
+      // Set default date range to current month
+      document.getElementById('startDate').value = formatForInput(getFirstDayOfMonth());
+      document.getElementById('endDate').value = formatForInput(getLastDayOfMonth());
       fetchHistories(1);
     });
   </script>

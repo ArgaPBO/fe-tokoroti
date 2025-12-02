@@ -1,8 +1,8 @@
 {
   "menu": [
     {
-      "url": "/",
-      "name": "Beranda",
+      "url": "/admin",
+      "name": "Dashboard",
       "icon": "menu-icon tf-icons ri-home-smile-line",
       "slug": "pages-home"
     },
