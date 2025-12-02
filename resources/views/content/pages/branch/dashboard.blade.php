@@ -1,4 +1,4 @@
-@extends('layouts.contentNavbarLayout')
+@extends('layouts.contentNavbarLayoutBranch')
 
 @section('title', 'Branch Dashboard')
 

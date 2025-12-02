@@ -1,4 +1,4 @@
-@extends('layouts.contentNavbarLayout')
+@extends('layouts.contentNavbarLayoutBranch')
 
 {{-- Judul ini akan muncul di navbar atas Anda --}}
 @section('title', 'Branch Product Management')

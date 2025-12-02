@@ -157,6 +157,12 @@
                  data-bs-toggle="modal" data-bs-target="#editBranchModal" onclick="loadEditBranch(${branch.id}, '${branch.name}')">
                 <i class="ri-pencil-line"></i>
               </a>
+              <a class="btn btn-sm btn-icon btn-outline-info me-2" href="/admin/branch?id=${branch.id}" title="View branch details">
+                <i class="ri-eye-line"></i>
+              </a>
+              <button class="btn btn-sm btn-icon btn-outline-danger" onclick="confirmDeleteBranch(${branch.id}, '${branch.name.replace(/'/g, "\\'")}')" title="Delete branch">
+                <i class="ri-delete-bin-5-line"></i>
+              </button>
             </div>
           </td>
         `;
@@ -258,6 +264,32 @@
         alert('Error updating branch');
       }
     });
+
+    // delete branch with confirmation
+    async function deleteBranch(id){
+      try{
+        const res = await fetch(`${API_URL}/branches/${id}`, {
+          method: 'DELETE',
+          headers: authHeaders(),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if(res.ok){
+          alert(data.message || 'Branch deleted');
+          fetchBranches(currentPage);
+        } else {
+          alert(data.message || 'Failed to delete branch');
+        }
+      } catch(err){
+        console.error(err); alert('Error deleting branch');
+      }
+    }
+
+    function confirmDeleteBranch(id, name){
+      if(confirm(`Delete branch ${name}? This action cannot be undone.`)){
+        deleteBranch(id);
+      }
+    }
 
     // Load branches on page load
     document.addEventListener('DOMContentLoaded', function() {
