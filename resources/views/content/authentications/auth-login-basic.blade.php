@@ -165,7 +165,7 @@
   </div>
 
   <div class="welcome-container">
-    <img src="{{ asset('assets/img/Logo_TokoKuePADFix.png') }}" alt="Logo Toko Kue">
+    <img src="{{ asset('assets/img/logo.png') }}" alt="Logo Toko Kue">
     <h1>Hello, Welcome!</h1>
     <p>Silakan masuk untuk melanjutkan.</p>
   </div>

@@ -77,7 +77,7 @@
           <!--/ Notification -->
 
           <!-- LOGO PENGGUNA (KODE ASLI ANDA) -->
-          <h1 class="nav-item nav-link mb-0 me-3 p-0" id="userDisplay">Admin - Loading...</h1>
+          <h1 class="nav-item nav-link mb-0 me-3 p-0" id="userDisplay">Branch - Loading...</h1>
           <div class="d-grid px-4 pt-2 pb-1">
                   <button class="btn btn-sm btn-danger d-flex" id="logoutBtn" onclick="handleLogout(event);">
                     <small class="align-middle">Logout</small>
@@ -93,6 +93,7 @@
   </nav>
 
   <script>
+    let branchName1 = 'Branch';
     function getCookie(name) {
       const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       return match ? decodeURIComponent(match[2]) : null;
@@ -106,7 +107,7 @@
       try {
         const apiUrl = '{{ env("API_URL") }}';
         const token = getCookie('token');
-        const res = await fetch(`${apiUrl}/admin`, {
+        const res = await fetch(`${apiUrl}/branch`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
@@ -122,11 +123,13 @@
         }
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
+        const branchName = data.branch?.name || 'Branch';
         const userName = data.user?.name || 'Unknown';
-        document.getElementById('userDisplay').textContent = `Admin - ${userName}`;
+        document.getElementById('userDisplay').textContent = `${branchName} - ${userName}`;
+        branchName1 = branchName;
       } catch (err) {
         console.error('Error fetching user:', err);
-        document.getElementById('userDisplay').textContent = 'Admin - Error';
+        document.getElementById('userDisplay').textContent = 'Branch - Error';
       }
     }
 

@@ -1,114 +1,38 @@
 {
   "menu": [
     {
-      "url": "/",
-      "name": "Beranda",
+      "url": "/admin",
+      "name": "Dashboard",
       "icon": "menu-icon tf-icons ri-home-smile-line",
       "slug": "pages-home"
     },
     {
-      "url": "/page-2",
-      "icon": "menu-icon tf-icons ri-file-3-line",
-      "name": "Page 2",
-      "slug": "pages-page-2"
+      "menuHeader": "Master Data"
     },
     {
-      "menuHeader": "Admin Panel"
-    },
-    {
-      "url": "/admin",
-      "name": "Dashboard",
-      "icon": "menu-icon tf-icons ri-home-smile-line",
-      "slug": "admin.dashboard"
-    },
-    {
-      "name": "Manajement",
-      "icon": "menu-icon tf-icons ri-settings-3-line",
-      "slug": "admin.manajement",
-      "submenu": [
-        {
-          "url": "/admin/products",
-          "name": "Product",
-          "icon": "menu-icon tf-icons ri-shopping-bag-3-line",
-          "slug": "admin.product"
-        },
-        {
-          "url": "/admin/branchs",
-          "name": "Branch",
-          "icon": "menu-icon tf-icons ri-store-2-line",
-          "slug": "admin.branch"
-        }
-      ]
-    },
-    {
-      "url": "/admin/financial",
-      "name": "Financial Report",
-      "icon": "menu-icon tf-icons ri-file-text-line",
-      "slug": "admin.financial"
-    },
-    {
-      "url": "/admin/performance",
-      "name": "Analysis Performa",
-      "icon": "menu-icon tf-icons ri-line-chart-line",
-      "slug": "admin.perform"
-    },
-    {
-      "menuHeader": "Cabang Panel"
-    },
-    {
-      "url": "/branch",
-      "name": "Dashboard",
-      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "url": "/admin/users",
+      "name": "User",
+      "icon": "menu-icon tf-icons ri-store-2-line",
       "slug": "branch.dashboard"
     },
     {
-      "name": "Branch Features",
+      "url": "/admin/branches",
+      "name": "Cabang",
       "icon": "menu-icon tf-icons ri-store-2-line",
-      "slug": "branch.features",
-      "submenu": [
-        {
-          "url": "/branch/transactions",
-          "name": "New Transactions",
-          "icon": "menu-icon tf-icons ri-exchange-dollar-line",
-          "slug": "branch.transactions"
-        },
-        {
-          "url": "/branch/export",
-          "name": "Export Report",
-          "icon": "menu-icon tf-icons ri-file-export-line",
-          "slug": "branch.export"
-        },
-        {
-          "url": "/branch/graphics",
-          "name": "Show Graphics",
-          "icon": "menu-icon tf-icons ri-bar-chart-2-line",
-          "slug": "branch.graphics"
-        }
-      ]
+      "slug": "branch.dashboard"
     },
     {
-      "menuHeader": "Halaman Lain"
+      "url": "/admin/products",
+      "name": "Produk",
+      "icon": "menu-icon tf-icons ri-store-2-line",
+      "slug": "branch.dashboard"
     },
     {
-      "url": "/pages/misc-error",
-      "name": "Error",
-      "icon": "menu-icon tf-icons ri-alert-line",
-      "slug": "pages-misc-error",
-      "target": "_blank"
-    },
-    {
-      "url": "/auth/login-basic",
-      "name": "Login",
-      "icon": "menu-icon tf-icons ri-logout-box-r-line",
-      "slug": "auth-login-basic",
-      "target": "_blank"
-    },
-    {
-      "url": "/auth/register-basic",
-      "name": "Register",
-      "icon": "menu-icon tf-icons ri-account-circle-line",
-      "slug": "auth-register-basic",
-      "target": "_blank"
+      "url": "/admin/expenses",
+      "name": "Pengeluaran",
+      "icon": "menu-icon tf-icons ri-store-2-line",
+      "slug": "branch.dashboard"
     }
+    
   ]
 }

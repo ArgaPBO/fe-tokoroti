@@ -10,6 +10,11 @@
     <!-- ===== Tombol Aksi (Action Bar) ===== -->
     <div class="card-header d-flex flex-column flex-md-row align-items-center justify-content-between">
 
+      {{-- Search and filter --}}
+      <div>
+        <input type="text" id="searchProduct" class="form-control" placeholder="Search product name..." />
+      </div>
+
       {{-- Tombol Tampilan Grid/List --}}
       <div class="btn-group mb-2 mb-md-0" role="group" aria-label="View Toggle">
         <button type="button" class="btn btn-outline-primary active"><i class="ri-list-check ri-20px"></i></button>
@@ -168,16 +173,33 @@
       return headers;
     }
 
+    function showAlert(message, type = 'success') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      const container = document.querySelector('.layout-page') || document.body;
+      container.insertBefore(alertDiv, container.firstChild);
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    let searchTimeout;
+
     async function fetchProducts(page = 1) {
       try {
-        const res = await fetch(`${API_URL}/products?page=${page}`, { headers: authHeaders() });
+        const search = document.getElementById('searchProduct').value.trim();
+        let url = `${API_URL}/products?page=${page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        const res = await fetch(url, { headers: authHeaders() });
         const data = await res.json();
         renderProductTable(data.data);
         renderPagination(data);
         currentPage = page;
       } catch (err) {
         console.error('Error fetching products', err);
-        alert('Failed to load products');
+        showAlert('Failed to load products', 'danger');
       }
     }
 
@@ -242,7 +264,7 @@
         document.getElementById('editProductPrice').value = data.price;
       } catch (err) {
         console.error('Error loading product', err);
-        alert('Failed to load product data');
+        showAlert('Failed to load product data', 'danger');
       }
     }
 
@@ -255,7 +277,7 @@
     document.getElementById('saveProductBtn').addEventListener('click', async () => {
       const name = document.getElementById('addProductName').value.trim();
       const price = Number(document.getElementById('addProductPrice').value);
-      if (!name || !price) { alert('Please enter name and price'); return; }
+      if (!name || !price) { showAlert('Please enter name and price', 'warning'); return; }
       try {
         const res = await fetch(`${API_URL}/products`, {
           method: 'POST',
@@ -264,14 +286,14 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message || 'Product created');
+          showAlert(data.message || 'Product created', 'success');
           document.getElementById('addProductForm').reset();
           bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
           fetchProducts(1);
         } else {
-          alert(data.message || 'Failed to create product');
+          showAlert(data.message || 'Failed to create product', 'danger');
         }
-      } catch (err) { console.error(err); alert('Error creating product'); }
+      } catch (err) { console.error(err); showAlert('Error creating product', 'danger'); }
     });
 
     // Save edited product
@@ -279,7 +301,7 @@
       const id = document.getElementById('editProductId').value;
       const name = document.getElementById('editProductName').value.trim();
       const price = Number(document.getElementById('editProductPrice').value);
-      if (!id || !name || !price) { alert('Please enter name and price'); return; }
+      if (!id || !name || !price) { showAlert('Please enter name and price', 'warning'); return; }
       try {
         const res = await fetch(`${API_URL}/products/${id}`, {
           method: 'PUT',
@@ -288,13 +310,13 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message || 'Product updated');
+          showAlert(data.message || 'Product updated', 'success');
           bootstrap.Modal.getInstance(document.getElementById('editProductModal')).hide();
           fetchProducts(currentPage);
         } else {
-          alert(data.message || 'Failed to update product');
+          showAlert(data.message || 'Failed to update product', 'danger');
         }
-      } catch (err) { console.error(err); alert('Error updating product'); }
+      } catch (err) { console.error(err); showAlert('Error updating product', 'danger'); }
     });
 
     // Confirm delete
@@ -307,15 +329,21 @@
         });
         const data = await res.json();
         if (res.ok) {
-          alert(data.message || 'Product deleted');
+          showAlert(data.message || 'Product deleted', 'success');
           bootstrap.Modal.getInstance(document.getElementById('deleteProductModal')).hide();
           fetchProducts(currentPage);
         } else {
-          alert(data.message || 'Failed to delete product');
+          showAlert(data.message || 'Failed to delete product', 'danger');
         }
-      } catch (err) { console.error(err); alert('Error deleting product'); }
+      } catch (err) { console.error(err); showAlert('Error deleting product', 'danger'); }
     });
 
-    document.addEventListener('DOMContentLoaded', () => fetchProducts(1));
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchProducts(1);
+      document.getElementById('searchProduct').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => fetchProducts(1), 400);
+      });
+    });
   </script>
 @endsection
