@@ -7,7 +7,7 @@
       "slug": "pages-home"
     },
     {
-      "menuHeader": "Master Data"
+      "menuHeader": "Cabang"
     },
     {
       "url": "/admin/users",
@@ -20,6 +20,9 @@
       "name": "Cabang",
       "icon": "menu-icon tf-icons ri-store-2-line",
       "slug": "branch.dashboard"
+    },
+    {
+      "menuHeader": "Master Data"
     },
     {
       "url": "/admin/products",
